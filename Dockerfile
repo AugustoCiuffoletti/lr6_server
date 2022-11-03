@@ -1,31 +1,44 @@
-FROM ubuntu:focal
+FROM ubuntu:jammy-20221020 as system
+
+ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update
-RUN apt-get --quiet=2 --yes install apt-utils
-RUN yes | unminimize
-RUN apt-get --quiet=2 --yes upgrade
+RUN apt-get --yes install sudo ca-certificates
+#RUN apt-get --quiet=2 --yes install apt-utils
+#RUN yes | unminimize
+#RUN apt-get --quiet=2 --yes upgrade
 
-RUN apt-get --quiet=2 --yes install nano
-RUN apt-get --quiet=2 --yes install bash-completion
-RUN apt-get --quiet=2 --yes install openssh-server
-RUN apt-get --quiet=2 --yes install sudo
+RUN apt-get --yes install nano openssh-client openssh-server
+# RUN apt-get --quiet=2 --yes install bash-completion
+# RUN apt-get --quiet=2 --yes install openssh-server
+# RUN apt-get --quiet=2 --yes install sudo
 
-# Setup the default user.
-RUN useradd -rm -d /home/user -s /bin/bash -g root -G sudo user
-RUN echo 'user:user' | chpasswd
-RUN ssh-keygen -A -v
 
 # Tools per esercizi networking
-RUN apt-get --quiet=2 --yes install netcat iproute2 net-tools dnsutils iputils-ping traceroute nmap
+RUN apt-get --yes install netcat iproute2 net-tools dnsutils iputils-ping traceroute nmap
 # Installazione strumenti di sviluppo
-RUN apt-get --quiet=2 --yes install make git
-RUN apt-get --quiet=2 --yes install openssh-client openssh-server
-# Installazione cattura pacchetti
-RUN apt-get --quiet=2 --yes install tcpdump
+RUN apt-get --yes install make git
+RUN apt-get --yes install openssh-client openssh-server
 
 # Tools per esercizi Flask
 RUN apt-get -qq update \
     && apt-get -qq --no-install-recommends install pip
+
+# Setup the default user.
+#RUN useradd -rm -d /home/user -s /bin/bash -g root -G sudo user
+#RUN echo 'user:user' | chpasswd
+#RUN ssh-keygen -A -v
+
+ARG username="user"
+ARG password="user"
+
+RUN useradd \
+	--create-home \
+	--shell /bin/bash \
+	--user-group \
+	--groups adm,sudo \
+	--password "$(openssl passwd -1 $password)"\
+	$username
 
 ### Cleanup (moved)
 RUN apt-get autoclean -y \
@@ -39,12 +52,6 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 ENV FLASK_ENV=development
 
-COPY startup.sh /startup.sh
-
-WORKDIR /root
-ENV HOME=/home/user \
-    SHELL=/bin/bash
-
-#RUN bash
+COPY entrypoint.sh /opt
     
-CMD ["/startup.sh"]
+CMD ["/opt/entrypoint.sh"]

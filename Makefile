@@ -2,7 +2,7 @@
 
 # Default values for variables
 OWNER = mastrogeppetto
-IMAGE  ?= lr6-server
+IMAGE  ?= lr6_server
 TAG   ?= latest
 # arm64 or amd64
 ARCH ?= amd64
@@ -21,18 +21,16 @@ multiarch:
 # Push image on dockerhub
 push:
 	ARCH=$(ARCH) make build
-	docker tag $(IMAGE):$(ARCH)-$(TAG) $(OWNER)/$(IMAGE):$(ARCH)-$(TAG)
 	docker push $(OWNER)/$(IMAGE):$(ARCH)-$(TAG)
 # Rebuild the image
 build:
 	cp Dockerfile Dockerfile.$(ARCH)
-	docker buildx build --load --platform linux/$(ARCH) -t $(IMAGE):$(ARCH)-$(TAG) -f Dockerfile.$(ARCH) .
+	docker buildx build --load --platform linux/$(ARCH) -t $(OWNER)/$(IMAGE):$(ARCH)-$(TAG) -f Dockerfile.$(ARCH) .
 #  Test run
 run:
-	docker run --rm -d -h server -p 2022:22 $(REPO):$(TAG)
+	docker run --rm -h server -p 2023:22 $(IMAGE):$(ARCH)-$(TAG)
 
 # Remove images
 clean:
-	docker rmi $(IMAGE):amd64-$(TAG)
-	docker rmi $(IMAGE):arm64-$(TAG)
+	docker rmi $(IMAGE):$(ARCH)-$(TAG)
 	docker image prune -f
