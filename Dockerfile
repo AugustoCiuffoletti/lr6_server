@@ -39,8 +39,6 @@ RUN useradd \
 	--password "$(openssl passwd -1 $password)"\
 	$username
 RUN mkdir /home/$username/.ssh
-RUN chown --recursive $username:$username /home/$username
-
 
 ### Cleanup (moved)
 RUN apt-get autoclean -y \
