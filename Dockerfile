@@ -15,7 +15,7 @@ RUN apt-get --yes install nano openssh-client openssh-server
 
 
 # Tools per esercizi networking
-RUN apt-get --yes install netcat iproute2 net-tools dnsutils iputils-ping traceroute nmap
+RUN apt-get --yes install netcat iproute2 net-tools dnsutils iputils-ping traceroute nmap curl
 # Installazione strumenti di sviluppo
 RUN apt-get --yes install make git
 RUN apt-get --yes install openssh-client openssh-server

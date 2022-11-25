@@ -22,7 +22,7 @@ multiarch:
 push:
 	ARCH=$(ARCH) make build
 	docker push $(OWNER)/$(IMAGE):$(ARCH)-$(TAG)
-# Rebuild the image
+# Build the image
 build:
 	cp Dockerfile Dockerfile.$(ARCH)
 	docker buildx build --load --platform linux/$(ARCH) -t $(OWNER)/$(IMAGE):$(ARCH)-$(TAG) -f Dockerfile.$(ARCH) .
